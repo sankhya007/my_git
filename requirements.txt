@@ -1,0 +1,3 @@
+# requirements.txt
+# MyGit has no external dependencies for basic functionality
+# Add testing dependencies below when needed
