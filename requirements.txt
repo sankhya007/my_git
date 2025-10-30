@@ -1,4 +1,79 @@
-# requirements.txt
-# MyGit has no external dependencies for basic functionality
-# Add testing dependencies below when needed
-# Minimal dependencies for now
+# MyGit - A minimal Git implementation in Python
+# Core Dependencies
+
+# Runtime Dependencies
+# No external dependencies for basic functionality - pure Python implementation
+
+# Development Dependencies
+black>=23.0.0                    # Code formatting
+isort>=5.12.0                    import sorting
+flake8>=6.0.0                    # Code linting
+mypy>=1.0.0                      # Static type checking
+pre-commit>=3.0.0                # Git hooks for code quality
+
+# Testing Dependencies
+pytest>=7.0.0                    # Test framework
+pytest-cov>=4.0.0                # Test coverage
+pytest-xdist>=3.0.0              # Parallel test execution
+pytest-mock>=3.10.0              # Mocking for tests
+pytest-benchmark>=4.0.0          # Performance benchmarking
+coverage>=7.0.0                  # Coverage reporting
+hypothesis>=6.0.0                # Property-based testing
+faker>=18.0.0                    # Test data generation
+
+# Documentation Dependencies
+sphinx>=6.0.0                    # Documentation generation
+sphinx-rtd-theme>=1.0.0          # ReadTheDocs theme
+myst-parser>=1.0.0               # Markdown support for Sphinx
+sphinx-autodoc-typehints>=1.0.0  # Type hint support
+
+# Build and Packaging Dependencies
+setuptools>=65.0.0               # Package building
+wheel>=0.38.0                    # Wheel package format
+twine>=4.0.0                     # Package uploading
+build>=0.10.0                    # PEP 517 build backend
+
+# Optional Dependencies (for enhanced features)
+chardet>=5.0.0                   # Character encoding detection
+# cryptography>=40.0.0           # GPG signing support (future)
+# pygments>=2.0.0                # Syntax highlighting (future)
+
+# Platform-Specific Dependencies
+# These are optional and only needed for specific platforms
+
+# Windows-specific (optional)
+# pywin32>=300.0.0              # Windows API access
+
+# Linux/macOS-specific (optional)
+# psutil>=5.9.0                 # System utilities
+
+# Development Tools (optional)
+ipython>=8.0.0                   # Enhanced REPL
+jupyter>=1.0.0                   # Notebook support
+ipdb>=0.13.0                     # Debugger
+
+# Code Quality Tools (optional)
+radon>=5.0.0                     # Code complexity analysis
+bandit>=1.7.0                    # Security linting
+safety>=2.0.0                    # Dependency vulnerability scanning
+vulture>=2.0.0                   # Dead code detection
+
+# Performance Tools (optional)
+py-spy>=0.3.0                    # Sampling profiler
+memory-profiler>=0.60.0          # Memory usage profiling
+pyinstrument>=4.0.0              # Call stack profiler
+
+# Compatibility Testing (optional)
+tox>=4.0.0                       # Multi-environment testing
+virtualenv>=20.0.0               # Virtual environment management
+
+# Continuous Integration (optional)
+codecov>=2.0.0                   # Coverage reporting
+pytest-html>=3.0.0               # HTML test reports
+pytest-rerunfailures>=10.0.0     # Retry failed tests
+
+# Git Integration (optional)
+# gitpython>=3.1.0              # Git integration for testing (compare with real Git)
+
+# Note: Some dependencies are commented out as they're for future enhancements
+# Uncomment them as needed when implementing new features

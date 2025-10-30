@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "mygit"
 version = "0.1.0"
@@ -9,8 +5,151 @@ description = "A minimal Git implementation in Python"
 authors = [
     {name = "Your Name", email = "your.email@example.com"},
 ]
-requires-python = ">=3.7"
 readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.7"
+keywords = ["git", "vcs", "version-control", "educational"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Education",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-benchmark>=4.0.0",
+    "coverage>=7.0.0",
+    "hypothesis>=6.0.0",
+    "faker>=18.0.0",
+]
+
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=1.0.0",
+    "sphinx-autodoc-typehints>=1.0.0",
+]
+
+build = [
+    "setuptools>=65.0.0",
+    "wheel>=0.38.0",
+    "twine>=4.0.0",
+    "build>=0.10.0",
+]
+
+enhanced = [
+    "chardet>=5.0.0",
+    # "cryptography>=40.0.0",
+    # "pygments>=2.0.0",
+]
+
+benchmark = [
+    "py-spy>=0.3.0",
+    "memory-profiler>=0.60.0",
+    "pyinstrument>=4.0.0",
+]
+
+quality = [
+    "radon>=5.0.0",
+    "bandit>=1.7.0",
+    "safety>=2.0.0",
+    "vulture>=2.0.0",
+]
+
+all = [
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-benchmark>=4.0.0",
+    "coverage>=7.0.0",
+    "hypothesis>=6.0.0",
+    "faker>=18.0.0",
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=1.0.0",
+    "sphinx-autodoc-typehints>=1.0.0",
+    "setuptools>=65.0.0",
+    "wheel>=0.38.0",
+    "twine>=4.0.0",
+    "build>=0.10.0",
+    "chardet>=5.0.0",
+]
 
 [project.scripts]
 mygit = "src.cli:main"
+
+[build-system]
+requires = ["setuptools>=65.0.0", "wheel>=0.38.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--verbose --color=yes --strict-markers --strict-config"
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "performance: marks tests as performance tests",
+    "fuzz: marks tests as fuzz tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/test_*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "pass",
+]
