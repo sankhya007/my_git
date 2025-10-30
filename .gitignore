@@ -79,3 +79,15 @@ poetry.lock
 # Build artifacts
 *.tar.gz
 *.whl
+
+cat >> .gitignore << 'EOF'
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Package build files
+*.egg-info/
+build/
+dist/
+EOF
