@@ -181,12 +181,24 @@ class ProgressIndicator:
             self.finish("Failed!")
 
 def print_banner():
-    """Print MyGit banner"""
-    banner = f"""
-{colorize('╔═════════════════════════════════════════════════╗', Color.CYAN)}
-{colorize('║', Color.CYAN)}           {colorize('MyGit', Color.BOLD + Color.MAGENTA)} - Minimal Git Implementation    {colorize('║', Color.CYAN)}
-{colorize('║', Color.CYAN)}          Educational Git Implementation         {colorize('║', Color.CYAN)}
-{colorize('╚═════════════════════════════════════════════════╝', Color.CYAN)}
+    """Print MyGit banner with platform-specific characters"""
+    import platform
+    
+    if platform.system() == 'Windows':
+        # ASCII banner for Windows - properly aligned
+        banner = f"""
+{colorize('=' * 35, Color.CYAN)}
+{colorize('|', Color.CYAN)}   {colorize('MyGit -- Git Implementation', Color.BOLD + Color.MAGENTA)}   {colorize('|', Color.CYAN)}
+{colorize('|', Color.CYAN)}   Educational Version Control   {colorize('|', Color.CYAN)}
+{colorize('=' * 35, Color.CYAN)}
+"""
+    else:
+        # Unicode banner for Unix-like systems - properly aligned
+        banner = f"""
+{colorize('╔════════════════════════════════════════════╗', Color.CYAN)}
+{colorize('║', Color.CYAN)}        {colorize('MyGit', Color.BOLD + Color.MAGENTA)} - Minimal Git Implementation        {colorize('║', Color.CYAN)}
+{colorize('║', Color.CYAN)}        Educational Git Implementation        {colorize('║', Color.CYAN)}
+{colorize('╚════════════════════════════════════════════╝', Color.CYAN)}
 """
     print(banner)
 

@@ -258,11 +258,13 @@ class Repository:
         self.validator = RepositoryValidator(self)
         
         # Set default configuration if creating new repository
+        # But only set up config if directories exist or we're about to create them
         if create and not self.exists():
-            self._setup_default_config()
+            # Don't set up config here - wait until create() is called
+            pass
     
     def create(self, bare: bool = False, shared: bool = False, 
-               object_format: ObjectFormat = ObjectFormat.SHA1) -> bool:
+            object_format: ObjectFormat = ObjectFormat.SHA1) -> bool:
         """Initialize a new repository with enhanced options"""
         try:
             # Create directory structure
@@ -287,8 +289,8 @@ class Repository:
             # Create sample hooks
             self._create_sample_hooks()
             
-            # Setup configuration
-            self._setup_default_config()
+            # REMOVE THIS LINE - it's redundant since we set config manually below
+            # self._setup_default_config()
             
             # Set repository type and format
             self.config.set('core', 'repositoryformatversion', RepositoryFormat.V1.value)
@@ -305,6 +307,7 @@ class Repository:
             
         except Exception as e:
             raise RepositoryError(f"Error creating repository: {e}")
+    
     
     def _setup_default_config(self):
         """Setup default repository configuration"""

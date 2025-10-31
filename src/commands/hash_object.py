@@ -167,73 +167,49 @@ class BatchProcessor:
         return success
 
 def cmd_hash_object(args):
-    """Compute object ID and optionally create objects"""
-    repo = None
-    if args.create or args.repo:
-        repo = Repository()
-        if not repo.exists():
-            print("Not a git repository (or any parent directory)")
-            if args.strict:
-                return False
-            # Continue without repository for hashing only
+    """Compute object ID and optionally create object"""
+    from pathlib import Path
+    from ..objects.blob import Blob
     
     try:
-        hasher = ObjectHasher(repo)
-        processor = BatchProcessor(hasher)
-        
-        # Handle batch mode
-        if args.batch:
-            return processor.process_stdin_batch(args.create, args.type)
-        
-        # Handle multiple files
-        if args.files:
-            return processor.process_files(
-                [Path(f) for f in args.files], 
-                args.type, 
-                args.create, 
-                args.stream,
-                args.verbose
-            )
-        
-        # Handle single file or stdin
-        if args.file:
-            # Single file
-            file_path = Path(args.file)
-            if not file_path.exists():
-                print(f"Error: File not found: {file_path}")
-                return False
+        path = Path(args.file)
+        if not path.exists():
+            print(f"Error: File '{args.file}' not found")
+            return False
             
-            sha = hasher.hash_file(file_path, args.type, args.create, args.stream)
+        # Create blob from file
+        blob = Blob.from_file(str(path))
+        sha = blob.get_hash()
+        
+        if args.verbose:
+            print(f"File: {args.file}")
+            print(f"Size: {blob.get_size()} bytes")
+            print(f"Type: {args.type}")
+        
+        # Write to object database if requested
+        if args.write:
+            from ..repository import find_repository
+            from ..objects.factory import ObjectFactory
             
-            if args.verbose:
-                size = file_path.stat().st_size
-                print(f"{sha}  {size:8d}  {file_path}")
+            repo = find_repository()
+            if repo:
+                factory = ObjectFactory.get_instance()
+                written_sha = factory.write_object(repo, blob)
+                if args.verbose:
+                    print(f"Written to object database: {written_sha}")
+                else:
+                    print(written_sha)
             else:
-                print(sha)
-                
-        else:
-            # Read from stdin
-            if sys.stdin.isatty() and not args.batch:
-                print("Reading from stdin... (Ctrl+D to end input)")
-            
-            data = sys.stdin.buffer.read()
-            if not data and args.strict:
-                print("Error: No input data provided")
+                print(f"Error: Not in a git repository")
                 return False
-            
-            sha = hasher.hash_data(data, args.type, args.create)
+        else:
+            # Just print the hash
             print(sha)
-        
+            
         return True
         
-    except KeyboardInterrupt:
-        print("\nOperation cancelled by user")
-        return False
     except Exception as e:
         print(f"Error: {e}")
-        if args.verbose:
-            import traceback
-            traceback.print_exc()
         return False
 
 def validate_object_type(obj_type: str) -> bool:
@@ -244,22 +220,10 @@ def validate_object_type(obj_type: str) -> bool:
 def setup_parser(parser):
     """Setup argument parser for hash-object command"""
     
-    # Input sources
-    input_group = parser.add_mutually_exclusive_group()
-    input_group.add_argument(
+    # Main file argument (required)
+    parser.add_argument(
         "file", 
-        nargs="?",
-        help="File to hash (use - for stdin)"
-    )
-    input_group.add_argument(
-        "-b", "--batch",
-        action="store_true",
-        help="Batch mode: read files from stdin, one per line"
-    )
-    input_group.add_argument(
-        "files",
-        nargs="*",
-        help="Multiple files to hash"
+        help="File to hash"
     )
     
     # Object options
@@ -271,17 +235,12 @@ def setup_parser(parser):
         help="Type of object to create (default: blob)"
     )
     parser.add_argument(
-        "-w", "--create",
+        "-w", "--write",
         action="store_true", 
         help="Actually write the object into the object database"
     )
     
     # Behavior options
-    parser.add_argument(
-        "--stream",
-        action="store_true",
-        help="Stream large files instead of loading into memory"
-    )
     parser.add_argument(
         "--strict",
         action="store_true",
@@ -291,11 +250,6 @@ def setup_parser(parser):
         "-v", "--verbose",
         action="store_true",
         help="Show verbose output including file sizes and paths"
-    )
-    parser.add_argument(
-        "--repo",
-        action="store_true",
-        help="Require a git repository (error if not in repo)"
     )
 
 def _display_usage_examples():
