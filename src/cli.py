@@ -183,10 +183,10 @@ class ProgressIndicator:
 def print_banner():
     """Print MyGit banner"""
     banner = f"""
-{colorize('╔════════════════════════════════════════════╗', Color.CYAN)}
-{colorize('║', Color.CYAN)}            {colorize('MyGit', Color.BOLD + Color.MAGENTA)} - Minimal Git Implementation    {colorize('║', Color.CYAN)}
-{colorize('║', Color.CYAN)}         Educational Git Implementation         {colorize('║', Color.CYAN)}
-{colorize('╚════════════════════════════════════════════╝', Color.CYAN)}
+{colorize('╔═════════════════════════════════════════════════╗', Color.CYAN)}
+{colorize('║', Color.CYAN)}           {colorize('MyGit', Color.BOLD + Color.MAGENTA)} - Minimal Git Implementation    {colorize('║', Color.CYAN)}
+{colorize('║', Color.CYAN)}          Educational Git Implementation         {colorize('║', Color.CYAN)}
+{colorize('╚═════════════════════════════════════════════════╝', Color.CYAN)}
 """
     print(banner)
 
@@ -256,6 +256,8 @@ def load_commands() -> CommandRegistry:
 
 def main():
     """Main CLI entry point with enhanced functionality"""
+    import sys
+    
     # Set up signal handler for Ctrl+C
     import signal
     signal.signal(signal.SIGINT, lambda sig, frame: handle_keyboard_interrupt())
@@ -328,9 +330,12 @@ def main():
         return 0
     
     if args.no_color:
-        # Disable colors by replacing colorize function
-        global colorize
-        colorize = lambda text, color: text
+    # Disable colors by replacing colorize function
+    # Use a different approach to avoid global declaration issues
+        import types
+        import sys
+        # Create a new module-level colorize function that doesn't use colors
+        sys.modules[__name__].colorize = lambda text, color: text
     
     # Setup logging
     setup_logging(args.verbose, args.log_file)

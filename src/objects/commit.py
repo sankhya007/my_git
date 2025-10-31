@@ -114,6 +114,10 @@ class Commit(GitObject):
                     key, value = line.split(' ', 1)
                     self.extra_headers[key] = value
         
+        # Handle case where we were still in gpgsig at the end
+        if in_gpgsig:
+            self.gpgsig = '\n'.join(gpgsig_lines)
+        
         self.message = '\n'.join(message_lines).strip()
     
     def _format_person_info(self, person: str, timestamp: int, timezone: str) -> str:
@@ -210,22 +214,37 @@ class Commit(GitObject):
     
     def get_author_info(self) -> Dict[str, Any]:
         """Get structured author information"""
-        name, email = self.parse_person(self.author)
-        return {
-            'name': name,
-            'email': email,
-            'timestamp': self.timestamp,
-            'timezone': self.timezone,
-            'date': datetime.fromtimestamp(self.timestamp).isoformat()
-        }
+        try:
+            name, email = self.parse_person(self.author)
+            return {
+                'name': name,
+                'email': email,
+                'timestamp': self.timestamp,
+                'timezone': self.timezone,
+                'date': datetime.fromtimestamp(self.timestamp).isoformat()
+            }
+        except ValueError:
+            return {
+                'name': self.author,
+                'email': '',
+                'timestamp': self.timestamp,
+                'timezone': self.timezone,
+                'date': datetime.fromtimestamp(self.timestamp).isoformat()
+            }
     
     def get_committer_info(self) -> Dict[str, Any]:
         """Get structured committer information"""
-        name, email = self.parse_person(self.committer)
-        return {
-            'name': name,
-            'email': email
-        }
+        try:
+            name, email = self.parse_person(self.committer)
+            return {
+                'name': name,
+                'email': email
+            }
+        except ValueError:
+            return {
+                'name': self.committer,
+                'email': ''
+            }
     
     def get_summary(self) -> str:
         """Get the first line of the commit message (summary)"""
@@ -356,15 +375,17 @@ class Commit(GitObject):
     
     def __repr__(self) -> str:
         """String representation of the commit"""
-        short_hash = self.get_hash()[:8]
+        short_hash = self.get_hash()[:8] if self.get_hash() else "unknown"
         summary = self.get_summary()[:50] + "..." if len(self.get_summary()) > 50 else self.get_summary()
         parent_info = f", parents={len(self.parents)}" if self.parents else ""
         return f"Commit({short_hash}, '{summary}'{parent_info})"
     
     def __str__(self) -> str:
         """Human-readable string representation"""
-        return (f"Commit {self.get_hash()[:8]} | "
-                f"Author: {self.get_author_info()['name']} | "
+        author_info = self.get_author_info()
+        author_name = author_info.get('name', 'Unknown')
+        return (f"Commit {self.get_hash()[:8] if self.get_hash() else 'unknown'} | "
+                f"Author: {author_name} | "
                 f"Message: {self.get_summary()}")
 
 

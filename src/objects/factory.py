@@ -26,8 +26,9 @@ class ObjectCache:
         with self._lock:
             if len(self._cache) >= self.max_size:
                 # Remove oldest item (first key)
-                oldest_key = next(iter(self._cache))
-                del self._cache[oldest_key]
+                if self._cache:
+                    oldest_key = next(iter(self._cache))
+                    del self._cache[oldest_key]
             self._cache[sha] = obj
     
     def invalidate(self, sha: str = None):
@@ -48,7 +49,7 @@ class ObjectCache:
             return {
                 'size': len(self._cache),
                 'max_size': self.max_size,
-                'usage_percentage': (len(self._cache) / self.max_size) * 100,
+                'usage_percentage': (len(self._cache) / self.max_size) * 100 if self.max_size > 0 else 0,
                 'cached_objects': list(self._cache.keys())[:10]  # First 10 for preview
             }
 
@@ -136,9 +137,9 @@ class ObjectFactory:
     
     # Core object types
     _core_types = {
-        b'blob': Blob,
-        b'commit': Commit,
-        b'tree': Tree,
+        'blob': Blob,
+        'commit': Commit,
+        'tree': Tree,
     }
     
     # Singleton instance
@@ -174,7 +175,7 @@ class ObjectFactory:
         # Get object class (check plugins first, then core types)
         obj_class = self._plugins.get_type(obj_type)
         if not obj_class:
-            obj_class = self._core_types.get(obj_type.encode())
+            obj_class = self._core_types.get(obj_type)
         
         if not obj_class:
             raise ValueError(f"Unknown object type: {obj_type}")
@@ -329,7 +330,7 @@ class ObjectFactory:
     
     def list_available_types(self) -> List[str]:
         """List all available object types (core + plugins)"""
-        core_types = [t.decode('ascii') for t in self._core_types.keys()]
+        core_types = list(self._core_types.keys())
         plugin_types = self._plugins.list_types()
         return sorted(set(core_types + plugin_types))
     

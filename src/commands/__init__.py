@@ -280,7 +280,7 @@ class CommandRegistry:
         
         # Import and register core commands
         from .init import cmd_init, setup_parser as init_parser
-        from .hash_object import cmd_hash_object, setup_parser as hash_object_parser
+        from .hash_object import cmd_hash_object, setup_parser as hash_object_parser  
         from .cat_file import cmd_cat_file, setup_parser as cat_file_parser
         from .add import cmd_add, setup_parser as add_parser
         from .commit import cmd_commit, setup_parser as commit_parser

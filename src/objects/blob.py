@@ -107,20 +107,6 @@ class Blob(GitObject):
     @staticmethod
     def _detect_encoding(data: bytes) -> str:
         """Detect text encoding"""
-        import chardet
-        
-        try:
-            result = chardet.detect(data)
-            confidence = result.get('confidence', 0)
-            encoding = result.get('encoding', 'utf-8')
-            
-            # Only use detected encoding if confidence is high
-            if confidence > 0.7:
-                return encoding.lower()
-        except ImportError:
-            # chardet not available, use basic detection
-            pass
-        
         # Basic encoding detection
         try:
             data.decode('utf-8')

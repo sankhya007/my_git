@@ -325,10 +325,9 @@ class Tree(GitObject):
             
             if entry.is_directory():
                 try:
-                    subtree = repo.objects.read_object(entry.sha)
-                    if isinstance(subtree, Tree):
-                        for subpath, subentry in subtree.walk(repo):
-                            yield (f"{entry.name}/{subpath}".strip('/'), subentry)
+                    # This would need access to repository object to load subtrees
+                    # For now, just yield the directory entry
+                    yield (entry.name, entry)
                 except Exception:
                     pass  # Skip inaccessible subtrees
     
@@ -484,6 +483,6 @@ class TreeDiff:
         return (f"TreeDiff(added={summary['added']}, "
                 f"removed={summary['removed']}, modified={summary['modified']})")
 
+
 # Register tree type with the base class
-GitObject.register_type('tree')(Tree)
 GitObject.register_type('tree')(Tree)

@@ -2,8 +2,6 @@ import os
 import hashlib
 import platform
 import time
-import fcntl  # Unix file locking
-import msvcrt  # Windows file locking
 import tempfile
 from pathlib import Path
 from typing import List, Iterator, Optional, Dict, Any, Set, Union
@@ -12,6 +10,12 @@ import stat
 import shutil
 from contextlib import contextmanager
 
+# Platform-specific imports - KEEP THIS SECTION
+if os.name == 'nt':  # Windows
+    import msvcrt  # Windows file locking
+else:  # Unix-like systems
+    import fcntl  # Unix file locking
+    
 class FileLockType(Enum):
     """Types of file locks"""
     SHARED = "shared"
@@ -65,28 +69,34 @@ class FileLock:
             try:
                 self._lock_file = open(lock_file_path, 'w')
                 
-                if get_platform() == Platform.WINDOWS:
+                if os.name == 'nt':  # Windows
                     # Windows file locking
                     try:
-                        if self.lock_type == FileLockType.SHARED:
-                            msvcrt.locking(self._lock_file.fileno(), msvcrt.LK_NBLCK, 1)
-                        else:
-                            msvcrt.locking(self._lock_file.fileno(), msvcrt.LK_NBLCK, 1)
-                    except IOError:
-                        self._lock_file.close()
-                        self._lock_file = None
-                        time.sleep(0.1)
-                        continue
+                        # On Windows, we'll use a simpler approach since msvcrt.locking has limitations
+                        # We'll rely on exclusive file creation as a locking mechanism
+                        import msvcrt
+                        msvcrt.locking(self._lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                    except (IOError, ImportError, AttributeError):
+                        # Fallback: try to create the file exclusively
+                        try:
+                            self._lock_file.close()
+                            # Try to open with exclusive creation
+                            self._lock_file = open(lock_file_path, 'x')
+                        except FileExistsError:
+                            self._lock_file = None
+                            time.sleep(0.1)
+                            continue
                 
-                else:
+                else:  # Unix-like systems
                     # Unix file locking
-                    lock_op = fcntl.LOCK_EX if self.lock_type == FileLockType.EXCLUSIVE else fcntl.LOCK_SH
-                    if self.lock_type == FileLockType.NON_BLOCKING:
-                        lock_op |= fcntl.LOCK_NB
-                    
                     try:
+                        import fcntl
+                        lock_op = fcntl.LOCK_EX if self.lock_type == FileLockType.EXCLUSIVE else fcntl.LOCK_SH
+                        if self.lock_type == FileLockType.NON_BLOCKING:
+                            lock_op |= fcntl.LOCK_NB
+                        
                         fcntl.flock(self._lock_file.fileno(), lock_op)
-                    except (IOError, BlockingIOError):
+                    except (IOError, BlockingIOError, ImportError):
                         self._lock_file.close()
                         self._lock_file = None
                         time.sleep(0.1)
@@ -107,8 +117,12 @@ class FileLock:
         """Release file lock"""
         if self._is_locked and self._lock_file:
             try:
-                if get_platform() != Platform.WINDOWS:
-                    fcntl.flock(self._lock_file.fileno(), fcntl.LOCK_UN)
+                if os.name != 'nt':  # Unix-like systems
+                    try:
+                        import fcntl
+                        fcntl.flock(self._lock_file.fileno(), fcntl.LOCK_UN)
+                    except ImportError:
+                        pass  # fcntl not available
                 self._lock_file.close()
                 
                 # Remove lock file

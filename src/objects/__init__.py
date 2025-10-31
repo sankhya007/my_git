@@ -201,6 +201,8 @@ def create_object(obj_type: ObjectType, data: bytes = None, **kwargs) -> GitObje
 
 def validate_object(obj: Any) -> bool:
     """Validate an object using the global object system"""
+    if not isinstance(obj, GitObject):
+        return False
     return _object_system.validate_object(obj)
 
 def register_object_type(obj_type: ObjectType, obj_class: Type[GitObject], **kwargs) -> None:
@@ -274,7 +276,7 @@ def discover_plugins() -> List[ObjectPlugin]:
             if py_file.name.startswith("_") or py_file.name.startswith("test_"):
                 continue
             
-            module_name = f".plugins.{py_file.stem}"
+            module_name = f"{__package__}.plugins.{py_file.stem}"
             try:
                 module = importlib.import_module(module_name, package=__package__)
                 
@@ -340,15 +342,6 @@ __all__ = [
     '__description__',
 ]
 
-# Backward compatibility exports
-# These ensure existing code continues to work
-GitObject = GitObject
-Blob = Blob
-Tree = Tree
-TreeEntry = TreeEntry
-Commit = Commit
-ObjectFactory = ObjectFactory
-
 # Type checking support
 if False:  # For mypy and other type checkers
     from typing import TYPE_CHECKING
@@ -372,9 +365,13 @@ def expect_object_type(expected_type: ObjectType):
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
             if isinstance(result, GitObject):
-                actual_type = ObjectType(result.__class__.__name__.lower())
-                if actual_type != expected_type:
-                    raise TypeError(f"Expected {expected_type}, got {actual_type}")
+                try:
+                    actual_type = ObjectType(result.__class__.__name__.lower())
+                    if actual_type != expected_type:
+                        raise TypeError(f"Expected {expected_type}, got {actual_type}")
+                except ValueError:
+                    # If the class name doesn't match any ObjectType, skip validation
+                    pass
             return result
         return wrapper
     return decorator

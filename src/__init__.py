@@ -11,5 +11,23 @@ __email__ = "mygit@example.com"
 # Import main classes for easier access
 from .repository import Repository
 
+# Import CLI for direct access
+from .cli import main
+
+# Import object system components
+from .objects import GitObject, Blob, Tree, Commit, ObjectFactory
+
+# Import utility system
+from .utils import get_utility_manager
+
 # Package-level imports
-__all__ = ['Repository']
+__all__ = [
+    'Repository',
+    'main',
+    'GitObject', 
+    'Blob',
+    'Tree', 
+    'Commit',
+    'ObjectFactory',
+    'get_utility_manager'
+]
