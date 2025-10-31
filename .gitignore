@@ -37,7 +37,7 @@ htmlcov/
 .nox/
 .cache
 
-# IDE
+# IDE - FIXED: Only ignore specific IDE directories, not all dot directories
 .vscode/
 .idea/
 *.swp
@@ -80,8 +80,6 @@ poetry.lock
 *.tar.gz
 *.whl
 
-cat >> .gitignore << 'EOF'
-
 # Python cache
 __pycache__/
 *.pyc
@@ -90,4 +88,3 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-EOF
